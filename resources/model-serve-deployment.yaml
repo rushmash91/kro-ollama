@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  labels:
+    app.kubernetes.io/name: ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama
+    spec:
+      volumes:
+      - name: ollama-volume
+        persistentVolumeClaim:
+          claimName: ollama-pvc  # <-- must match the first deployment
+      containers:
+      - name: serve
+        image: alpine/ollama:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: OLLAMA_KEEP_ALIVE
+          value: "-1"
+        # Serve DeepSeek's 1.5B model
+        command: ["ollama", "serve"]
+        ports:
+        - containerPort: 11434
+        volumeMounts:
+        - name: ollama-volume
+          mountPath: /root/.ollama

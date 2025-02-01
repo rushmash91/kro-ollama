@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama-pull
+  labels:
+    app.kubernetes.io/name: ollama-pull
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama-pull
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama-pull
+    spec:
+      volumes:
+      - name: ollama-volume
+        persistentVolumeClaim:
+          claimName: ollama-pvc  # <-- same PVC that the 'serve' deployment will use
+      containers:
+      - name: pull-model
+        image: ollama/ollama:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: OLLAMA_KEEP_ALIVE
+          value: "-1"
+        # Pull the DeepSeek model, then keep the container alive
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "ollama run deepseek-r1:1.5b"]  
+        ports:
+        - containerPort: 11434
+        volumeMounts:
+        - name: ollama-volume
+          mountPath: /root/.ollama

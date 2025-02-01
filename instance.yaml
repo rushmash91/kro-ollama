@@ -1,0 +1,25 @@
+apiVersion: kro.run/v1alpha1
+kind: OllamaDeployment
+metadata:
+  name: deepseek
+spec:
+  name: deepseek
+  namespace: default
+  values:
+    storage: 50Gi # should have enough capacity for the model
+    model:
+      name: deepseek-r1
+      size: 1.5b
+    resources:
+      requests:
+        cpu: "2"
+        memory: "8Gi"
+      limits:
+        cpu: "4"
+        memory: "16Gi"
+    gpu:
+      enabled: false
+      count: 1
+    ingress:
+      enabled: false
+      port: 80
